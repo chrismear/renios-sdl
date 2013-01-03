@@ -25,7 +25,7 @@
 #include "SDL_coreaudio.h"
 #include "SDL_assert.h"
 
-#define DEBUG_COREAUDIO 0
+#define DEBUG_COREAUDIO 1
 
 static void COREAUDIO_CloseDevice(_THIS);
 
