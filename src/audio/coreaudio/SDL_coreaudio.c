@@ -273,7 +273,6 @@ outputCallback(void *inRefCon,
        SDL_assert(this->spec.channels == ioData->mNumberChannels);
      */
 
-    SDL_memset(this->hidden->buffer, 0, this->hidden->bufferSize);
 
     for (i = 0; i < ioData->mNumberBuffers; i++) {
         abuf = &ioData->mBuffers[i];
@@ -281,6 +280,7 @@ outputCallback(void *inRefCon,
         ptr = abuf->mData;
         while (remaining > 0) {
             if (this->hidden->bufferOffset >= this->hidden->bufferSize) {
+                SDL_memset(this->hidden->buffer, this->spec.silence, this->hidden->bufferSize);
                 /* Generate the data */
                 SDL_mutexP(this->mixer_lock);
                 (*this->spec.callback)(this->spec.userdata,
