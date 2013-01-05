@@ -115,6 +115,7 @@ static void SDL_IdleTimerDisabledChanged(const char *name, const char *oldValue,
                                                      orientation: UIImageOrientationRight];
     }
     if (self->splashPortrait) {
+        NSLog(@"retaining splashPortrait");
         [self->splashPortrait retain];
     }
     if (self->splashLandscape) {
