@@ -273,6 +273,8 @@ outputCallback(void *inRefCon,
        SDL_assert(this->spec.channels == ioData->mNumberChannels);
      */
 
+    SDL_memset(this->hidden->buffer, 0, this->hidden->bufferSize);
+
     for (i = 0; i < ioData->mNumberBuffers; i++) {
         abuf = &ioData->mBuffers[i];
         remaining = abuf->mDataByteSize;
