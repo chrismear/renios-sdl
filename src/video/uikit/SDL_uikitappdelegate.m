@@ -96,10 +96,13 @@ static void SDL_IdleTimerDisabledChanged(const char *name, const char *oldValue,
         return nil;
     }
 
+    NSLog(@"Setting up SDL_splashviewcontroller");
+
     self->splash = [[UIImageView alloc] init];
     [self setView:self->splash];
 
     CGSize size = [UIScreen mainScreen].bounds.size;
+    NSLog(@"[UIScreen mainScreen].bounds.size: %f x %f", size.width, size.height);
     float height = SDL_max(size.width, size.height);
     self->splashPortrait = [UIImage imageNamed:[NSString stringWithFormat:@"Default-%dh.png", (int)height]];
     if (!self->splashPortrait) {
@@ -115,6 +118,7 @@ static void SDL_IdleTimerDisabledChanged(const char *name, const char *oldValue,
         [self->splashPortrait retain];
     }
     if (self->splashLandscape) {
+        NSLog(@"retaining splashLandscape");
         [self->splashLandscape retain];
     }
  
@@ -147,11 +151,15 @@ static void SDL_IdleTimerDisabledChanged(const char *name, const char *oldValue,
 
 - (void)updateSplashImage:(UIInterfaceOrientation)interfaceOrientation
 {
+    NSLog(@"Updating SDL splash image");
+
     UIImage *image;
     
     if (UIInterfaceOrientationIsLandscape(interfaceOrientation)) {
+        NSLog(@"Setting landscape splash");
         image = self->splashLandscape;
     } else {
+        NSLog(@"Setting portrait splash");
         image = self->splashPortrait;
     }
     if (image)
@@ -209,10 +217,15 @@ static void SDL_IdleTimerDisabledChanged(const char *name, const char *oldValue,
     /* Keep the launch image up until we set a video mode */
     launch_window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
 
+    NSLog(@"In SDLUIKitDelegate.didFinishLaunchingWithOptions");
+
     UIViewController *splashViewController = [[SDL_splashviewcontroller alloc] init];
     launch_window.rootViewController = splashViewController;
+    NSLog(@"launch_window: %@", launch_window);
+    NSLog(@"rootViewController: %@", launch_window.rootViewController);
     [launch_window addSubview:splashViewController.view];
     [launch_window makeKeyAndVisible];
+    NSLog(@"launch_window after making visible: %@", launch_window);
 
     /* Set working directory to resource path */
     [[NSFileManager defaultManager] changeCurrentDirectoryPath: [[NSBundle mainBundle] resourcePath]];
