@@ -155,13 +155,19 @@ static void SDL_IdleTimerDisabledChanged(const char *name, const char *oldValue,
 
     UIImage *image;
     
-    if (UIInterfaceOrientationIsLandscape(interfaceOrientation)) {
-        NSLog(@"Setting landscape splash");
-        image = self->splashLandscape;
-    } else {
-        NSLog(@"Setting portrait splash");
-        image = self->splashPortrait;
-    }
+    // if (UIInterfaceOrientationIsLandscape(interfaceOrientation)) {
+    //     NSLog(@"Setting landscape splash");
+    //     image = self->splashLandscape;
+    // } else {
+    //     NSLog(@"Setting portrait splash");
+    //     image = self->splashPortrait;
+    // }
+
+    /*
+     * During launch, iOS's internal orientation is always portrait.
+     */
+
+    image = self->splashPortrait;
     if (image)
     {
         splash.image = image;
