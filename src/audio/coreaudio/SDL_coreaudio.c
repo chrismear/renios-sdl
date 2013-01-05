@@ -445,6 +445,7 @@ prepare_audiounit(_THIS, const char *devname, int iscapture,
     /* Allocate a sample buffer */
     this->hidden->bufferOffset = this->hidden->bufferSize = this->spec.size;
     this->hidden->buffer = SDL_malloc(this->hidden->bufferSize);
+    SDL_memset(this->hidden->buffer, 0, this->hidden->bufferSize);
 
     result = AudioUnitInitialize(this->hidden->audioUnit);
     CHECK_RESULT("AudioUnitInitialize");
