@@ -129,8 +129,9 @@
 #define SDL_VIDEO_DRIVER_UIKIT	1
 #define SDL_VIDEO_DRIVER_DUMMY	1
 
-/* enable OpenGL ES */
-#define SDL_VIDEO_OPENGL_ES	1
+/* enable OpenGL ES 2 */
+#undef SDL_VIDEO_OPENGL_ES
+#define SDL_VIDEO_OPENGL_ES2 1
 #define SDL_VIDEO_RENDER_OGL_ES	1
 #define SDL_VIDEO_RENDER_OGL_ES2	1
 
