@@ -275,6 +275,12 @@ SDL_CompatEventFilter(void *userdata, SDL_Event * event)
                     if ((shifted ^ capslock) != 0) {
                         unicode = SDL_toupper(unicode);
                     }
+                } else if (unicode == '-') {
+                    int shifted = !!(event->key.keysym.mod & KMOD_SHIFT);
+                    int capslock = !!(event->key.keysym.mod & KMOD_CAPS);
+                    if ((shifted ^ capslock) != 0) {
+                        unicode = '_';
+                    }
                 }
             }
             if (unicode) {
