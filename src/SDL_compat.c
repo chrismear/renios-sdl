@@ -30,7 +30,7 @@
 #include "render/SDL_yuv_sw_c.h"
 
 
-static SDL_Window *SDL_VideoWindow = NULL;
+SDL_Window *SDL_VideoWindow = NULL;
 static SDL_Surface *SDL_WindowSurface = NULL;
 static SDL_Surface *SDL_VideoSurface = NULL;
 static SDL_Surface *SDL_ShadowSurface = NULL;
