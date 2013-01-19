@@ -70,6 +70,13 @@
 
     touchId = SDL_AddTouch(&touch, "IPHONE SCREEN");
 
+    /*
+     * Ren'iOS
+     * Initialize iOS-native gesture recognizers
+     */
+
+    [self createGestureRecognizers];
+
     return self;
 
 }
@@ -82,7 +89,7 @@
     SDL_Window *window = self->viewcontroller.window;
     SDL_VideoDisplay *display = SDL_GetDisplayForWindow(window);
     SDL_DisplayModeData *displaymodedata = (SDL_DisplayModeData *) display->current_mode.driverdata;
-    
+
     if (normalize) {
         CGRect bounds = [self bounds];
         point.x /= bounds.size.width;
@@ -210,6 +217,53 @@
 #endif
         touch = (UITouch*)[enumerator nextObject];
     }
+}
+
+/*
+ * Ren'iOS
+ * iOS-native gesture recognizers
+ */
+
+- (void)createGestureRecognizers
+{
+    UITapGestureRecognizer *doubleFingerTap = [[UITapGestureRecognizer alloc]
+        initWithTarget:self action:@selector(handleDoubleFingerTap:)];
+    doubleFingerTap.numberOfTapsRequired = 1;
+    doubleFingerTap.numberOfTouchesRequired = 2;
+    // doubleFingerTap.delaysTouchesBegan = YES;
+    [self addGestureRecognizer:doubleFingerTap];
+    [doubleFingerTap release];
+
+    UISwipeGestureRecognizer *doubleSwipeUp = [[UISwipeGestureRecognizer alloc]
+        initWithTarget:self action:@selector(handleDoubleSwipeUp:)];
+    doubleSwipeUp.numberOfTouchesRequired = 2;
+    doubleSwipeUp.direction = UISwipeGestureRecognizerDirectionUp;
+    // doubleSwipeUp.delaysTouchesBegan = YES;
+    [self addGestureRecognizer:doubleSwipeUp];
+    [doubleSwipeUp release];
+
+    UISwipeGestureRecognizer *doubleSwipeDown = [[UISwipeGestureRecognizer alloc]
+        initWithTarget:self action:@selector(handleDoubleSwipeDown:)];
+    doubleSwipeDown.numberOfTouchesRequired = 2;
+    doubleSwipeDown.direction = UISwipeGestureRecognizerDirectionDown;
+    // doubleSwipeDown.delaysTouchesBegan = YES;
+    [self addGestureRecognizer:doubleSwipeDown];
+    [doubleSwipeDown release];
+}
+
+- (IBAction)handleDoubleFingerTap:(UIGestureRecognizer *)sender
+{
+    NSLog(@"Ren'iOS: Detected two-finger tap.");
+}
+
+- (IBAction)handleDoubleSwipeUp:(UIGestureRecognizer *)sender
+{
+    NSLog(@"Ren'iOS: Detected double swipe up.");
+}
+
+- (IBAction)handleDoubleSwipeDown:(UIGestureRecognizer *)sender
+{
+    NSLog(@"Ren'iOS: Detected double swipe down.");
 }
 
 /*
