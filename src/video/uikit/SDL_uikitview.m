@@ -82,7 +82,7 @@
     SDL_Window *window = self->viewcontroller.window;
     SDL_VideoDisplay *display = SDL_GetDisplayForWindow(window);
     SDL_DisplayModeData *displaymodedata = (SDL_DisplayModeData *) display->current_mode.driverdata;
-    
+
     if (normalize) {
         CGRect bounds = [self bounds];
         point.x /= bounds.size.width;
@@ -100,13 +100,15 @@
     UITouch *touch = (UITouch*)[enumerator nextObject];
 
     while (touch) {
-        if (!leftFingerDown) {
+        if (!leftFingerDown && !rightFingerDown) {
             CGPoint locationInView = [self touchLocation:touch shouldNormalize:NO];
 
             /* send moved event */
             SDL_SendMouseMotion(NULL, 0, locationInView.x, locationInView.y);
 
             leftFingerDown = (SDL_FingerID)touch;
+        } else if (!rightFingerDown) {
+            rightFingerDown = (SDL_FingerID)touch;
         }
 
         CGPoint locationInView = [self touchLocation:touch shouldNormalize:YES];
@@ -140,13 +142,20 @@
 
     while(touch) {
         if ((SDL_FingerID)touch == leftFingerDown) {
-            /* send mouse down event */
-            SDL_SendMouseButton(NULL, SDL_PRESSED, SDL_BUTTON_LEFT);
+            if (!rightFingerDown) {
+                /* send mouse down event */
+                SDL_SendMouseButton(NULL, SDL_PRESSED, SDL_BUTTON_LEFT);
 
-            /* send mouse up */
-            SDL_SendMouseButton(NULL, SDL_RELEASED, SDL_BUTTON_LEFT);
+                /* send mouse up */
+                SDL_SendMouseButton(NULL, SDL_RELEASED, SDL_BUTTON_LEFT);
+            }
 
             leftFingerDown = 0;
+        }
+        if ((SDL_FingerID)touch == rightFingerDown) {
+            SDL_SendMouseButton(NULL, SDL_PRESSED, SDL_BUTTON_RIGHT);
+            SDL_SendMouseButton(NULL, SDL_RELEASED, SDL_BUTTON_RIGHT);
+            rightFingerDown = 0;
         }
 
         CGPoint locationInView = [self touchLocation:touch shouldNormalize:YES];
