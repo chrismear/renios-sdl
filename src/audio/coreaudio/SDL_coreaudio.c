@@ -382,7 +382,7 @@ prepare_audiounit(_THIS, const char *devname, int iscapture,
         return 0;
     }
 #endif
-    
+
     SDL_zero(desc);
     desc.componentType = kAudioUnitType_Output;
     desc.componentManufacturer = kAudioUnitManufacturer_Apple;
@@ -548,7 +548,7 @@ COREAUDIO_Init(SDL_AudioDriverImpl * impl)
        behavior.  If this is common, we can add an SDL hint for this.
     */
     AudioSessionInitialize(NULL, NULL, NULL, nil);
-    UInt32 category = kAudioSessionCategory_AmbientSound;
+    UInt32 category = kAudioSessionCategory_SoloAmbientSound;
     AudioSessionSetProperty(kAudioSessionProperty_AudioCategory, sizeof(UInt32), &category);
 #endif
 
