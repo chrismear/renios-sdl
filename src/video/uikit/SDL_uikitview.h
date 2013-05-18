@@ -39,6 +39,8 @@
     SDL_TouchID touchId;
     SDL_FingerID leftFingerDown;
     SDL_FingerID rightFingerDown;
+    SDL_bool leftMouseDownSent;
+    SDL_bool twoFingerTouch;
 #ifndef IPHONE_TOUCH_EFFICIENT_DANGEROUS
     UITouch *finger[MAX_SIMULTANEOUS_TOUCHES];
 #endif

@@ -94,6 +94,12 @@
     return point;
 }
 
+- (void)sendLeftMouseDown
+{
+    SDL_SendMouseButton(NULL, SDL_PRESSED, SDL_BUTTON_LEFT);
+    leftMouseDownSent = SDL_TRUE;
+}
+
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
 {
     NSEnumerator *enumerator = [touches objectEnumerator];
@@ -103,12 +109,23 @@
         if (!leftFingerDown && !rightFingerDown) {
             CGPoint locationInView = [self touchLocation:touch shouldNormalize:NO];
 
+            twoFingerTouch = SDL_FALSE;
+
+            /* Queue mouse-down event to trigger after a short delay,
+             * so we can cancel it should a second finger touch the 
+             * surface
+             */
+             leftMouseDownSent = SDL_FALSE;
+             [self performSelector:@selector(sendLeftMouseDown) withObject:nil afterDelay:0.1];
+
             /* send moved event */
             SDL_SendMouseMotion(NULL, 0, locationInView.x, locationInView.y);
 
             leftFingerDown = (SDL_FingerID)touch;
         } else if (!rightFingerDown) {
+            [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(sendLeftMouseDown) object:nil];
             rightFingerDown = (SDL_FingerID)touch;
+            twoFingerTouch = SDL_TRUE;
         }
 
         CGPoint locationInView = [self touchLocation:touch shouldNormalize:YES];
@@ -141,22 +158,102 @@
     UITouch *touch = (UITouch*)[enumerator nextObject];
 
     while(touch) {
+
         if ((SDL_FingerID)touch == leftFingerDown) {
-            if (!rightFingerDown) {
-                /* send mouse down event */
-                SDL_SendMouseButton(NULL, SDL_PRESSED, SDL_BUTTON_LEFT);
-
-                /* send mouse up */
-                SDL_SendMouseButton(NULL, SDL_RELEASED, SDL_BUTTON_LEFT);
+            if (twoFingerTouch == SDL_TRUE) {
+                if (rightFingerDown) {
+                    // Right finger is still being held down
+                    if (leftMouseDownSent == SDL_TRUE) {
+                        /* 
+                         * This was a touch sequence where a second finger touched the screen,
+                         * but did so more than 0.1s after the first finger touched the screen.
+                         * This means we effectively ignore the second finger, and treat the
+                         * whole touch sequence as if it were a just a single-finger touch.
+                         */
+                        SDL_SendMouseButton(NULL, SDL_RELEASED, SDL_BUTTON_LEFT);
+                    } else {
+                        /*
+                         * This touch sequence involved two fingers being placed down within
+                         * 0.1s of each other, so we treat it as a two-finger touch.
+                         * Although the first finger has been lifted here, the second
+                         * finger is still touching the screen, so we will do nothing until
+                         * the second finger finishes its touch.
+                         */
+                    }
+                } else {
+                    /*
+                     * This was a two-finger touch sequence, but the second (right) finger
+                     * has already been lifted.
+                     */
+                    if (leftMouseDownSent == SDL_TRUE) {
+                        /*
+                         * Two fingers were involved, but the second finger touched the screen
+                         * more than 0.1s after the first finger, so we effectively ignore
+                         * the presence of the second finger. Hence we treat this as a single-
+                         * finger touch.
+                         */
+                        SDL_SendMouseButton(NULL, SDL_RELEASED, SDL_BUTTON_LEFT);
+                    } else {
+                        /*
+                         * The two fingers touched the screen within 0.1s of each other,
+                         * and we are now seeing the last finger being removed from the
+                         * screen. We treat this as a two-finger tap == right-click.
+                         */
+                        SDL_SendMouseButton(NULL, SDL_PRESSED, SDL_BUTTON_RIGHT);
+                        SDL_SendMouseButton(NULL, SDL_RELEASED, SDL_BUTTON_RIGHT);
+                    }
+                    /*
+                     * As this is the end of the touch sequence, we can reset our state
+                     * variables.
+                     */
+                    twoFingerTouch = SDL_FALSE;
+                    leftMouseDownSent = SDL_FALSE;
+                }
+            } else {
+                // No second finger was involved in ths touch sequence.
+                if (leftMouseDownSent == SDL_TRUE) {
+                    SDL_SendMouseButton(NULL, SDL_RELEASED, SDL_BUTTON_LEFT);
+                } else {
+                    // The touch start and touch end occurred before the delayed
+                    // mouse-down had a chance to fire. Cancel it, and do
+                    // the mouse down and mouse up together here.
+                    [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(sendLeftMouseDown) object:nil];
+                    SDL_SendMouseButton(NULL, SDL_PRESSED, SDL_BUTTON_LEFT);
+                    SDL_SendMouseButton(NULL, SDL_RELEASED, SDL_BUTTON_LEFT);
+                }
+                leftMouseDownSent = SDL_FALSE;
             }
-
             leftFingerDown = 0;
-        }
-        if ((SDL_FingerID)touch == rightFingerDown) {
-            SDL_SendMouseButton(NULL, SDL_PRESSED, SDL_BUTTON_RIGHT);
-            SDL_SendMouseButton(NULL, SDL_RELEASED, SDL_BUTTON_RIGHT);
+        } else if ((SDL_FingerID)touch == rightFingerDown) {
+            if (leftFingerDown) {
+                /*
+                 * This was a two-finger touch sequence, but the first (left) finger
+                 * is still being held down. So do nothing here.
+                 */
+            } else {
+                /*
+                 * This was a two-finger touch sequence, and we are the last finger to be lifted.
+                 */
+                if (leftMouseDownSent == SDL_TRUE) {
+                    // Do nothing. Second finger started touching too late, so we treat
+                    // the whole touch sequence as a one-finger touch.
+                } else {
+                    /*
+                     * A two-finger touch that started with both fingers within
+                     * 0.1s of each other (leftMouseDown was cancelled), and 
+                     * we are the last finger to be lifted. So, trigger our
+                     * two-finger tap event, which is equivalent to a right-click.
+                     */
+                    SDL_SendMouseButton(NULL, SDL_PRESSED, SDL_BUTTON_RIGHT);
+                    SDL_SendMouseButton(NULL, SDL_RELEASED, SDL_BUTTON_RIGHT);
+                }
+                // End of touch sequence, so reset variables.
+                leftMouseDownSent = SDL_FALSE;
+                twoFingerTouch = SDL_FALSE;
+            }
             rightFingerDown = 0;
         }
+
 
         CGPoint locationInView = [self touchLocation:touch shouldNormalize:YES];
 #ifdef IPHONE_TOUCH_EFFICIENT_DANGEROUS
