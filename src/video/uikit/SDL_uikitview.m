@@ -171,6 +171,9 @@
                          * whole touch sequence as if it were a just a single-finger touch.
                          */
                         SDL_SendMouseButton(NULL, SDL_RELEASED, SDL_BUTTON_LEFT);
+
+                        // End of mouse motion; reset pointer to 0,0
+                        SDL_SendMouseMotion(NULL, 0, 0, 0);
                     } else {
                         /*
                          * This touch sequence involved two fingers being placed down within
@@ -193,6 +196,9 @@
                          * finger touch.
                          */
                         SDL_SendMouseButton(NULL, SDL_RELEASED, SDL_BUTTON_LEFT);
+
+                        // End of mouse motion; reset pointer to 0,0
+                        SDL_SendMouseMotion(NULL, 0, 0, 0);
                     } else {
                         /*
                          * The two fingers touched the screen within 0.1s of each other,
@@ -201,7 +207,9 @@
                          */
                         SDL_SendMouseButton(NULL, SDL_PRESSED, SDL_BUTTON_RIGHT);
                         SDL_SendMouseButton(NULL, SDL_RELEASED, SDL_BUTTON_RIGHT);
-                    }
+
+                        // End of mouse motion; reset pointer to 0,0
+                        SDL_SendMouseMotion(NULL, 0, 0, 0);                    }
                     /*
                      * As this is the end of the touch sequence, we can reset our state
                      * variables.
@@ -213,6 +221,10 @@
                 // No second finger was involved in ths touch sequence.
                 if (leftMouseDownSent == SDL_TRUE) {
                     SDL_SendMouseButton(NULL, SDL_RELEASED, SDL_BUTTON_LEFT);
+
+
+                    // End of mouse motion; reset pointer to 0,0
+                    SDL_SendMouseMotion(NULL, 0, 0, 0);
                 } else {
                     // The touch start and touch end occurred before the delayed
                     // mouse-down had a chance to fire. Cancel it, and do
@@ -220,6 +232,9 @@
                     [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(sendLeftMouseDown) object:nil];
                     SDL_SendMouseButton(NULL, SDL_PRESSED, SDL_BUTTON_LEFT);
                     SDL_SendMouseButton(NULL, SDL_RELEASED, SDL_BUTTON_LEFT);
+
+                    // End of mouse motion; reset pointer to 0,0
+                    SDL_SendMouseMotion(NULL, 0, 0, 0);
                 }
                 leftMouseDownSent = SDL_FALSE;
             }
@@ -246,6 +261,9 @@
                      */
                     SDL_SendMouseButton(NULL, SDL_PRESSED, SDL_BUTTON_RIGHT);
                     SDL_SendMouseButton(NULL, SDL_RELEASED, SDL_BUTTON_RIGHT);
+
+                    // End of mouse motion; reset pointer to 0,0
+                    SDL_SendMouseMotion(NULL, 0, 0, 0);
                 }
                 // End of touch sequence, so reset variables.
                 leftMouseDownSent = SDL_FALSE;
