@@ -3,7 +3,7 @@ Ren'iOS patches for SDL
 
 This is a support repository for the Ren'iOS project. It is used to develop an amended version of SDL for that project.
 
-Find out more about Pygame at http://www.libsdl.org/
+Find out more about SDL at http://www.libsdl.org/
 
 Find out more about Ren'iOS at https://github.com/chrismear/renios
 
